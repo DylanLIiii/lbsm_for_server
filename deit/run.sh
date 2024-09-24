@@ -13,7 +13,7 @@ mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME1}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME1}/outputs.txt"
 
 # Run the distributed training
-python CUDA_VISIBLE_DEVICES=0,1,2,3 -m torch.distributed.launch \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
     --nproc_per_node=$NUM_GPUS \
     --use_env \
     main.py \
