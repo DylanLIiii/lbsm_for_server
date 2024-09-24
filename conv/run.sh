@@ -24,6 +24,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --train-crop-size 224 \
   --print-freq 500 \
   --output-dir "${OUTPUT_DIR}/${EXPERIMENT_NAME}" \
-  --save_frequency 100 \
-  --seed 1 \
+  --save_frequency 1 \
+  --seed 0 \
   | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"

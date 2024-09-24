@@ -1,0 +1,3 @@
+- Use Mixup and Cutmix 
+- Label Smoothing Rate 
+- Long Training?
