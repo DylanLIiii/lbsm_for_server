@@ -18,7 +18,7 @@ from timm.optim import create_optimizer
 from timm.utils import NativeScaler, get_state_dict, ModelEma
 
 from datasets import build_dataset
-from engine import train_one_epoch4, evaluate
+from engine import train_one_epoch4, evaluate, train_one_epoch3, train_one_epoch2, train_one_epoch1, train_one_epoch5
 from losses import DistillationLoss
 from samplers import RASampler
 from augment import new_data_aug_generator
@@ -185,8 +185,25 @@ def get_args_parser():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
+    
+    # for train select 
+    parser.add_argument('--train-func', type=str, default='train_one_epoch3')
     return parser
 
+
+def select_train_func(args):
+    if args.train_func == 'train_one_epoch1':
+        return train_one_epoch1
+    elif args.train_func == 'train_one_epoch2':
+        return train_one_epoch2
+    elif args.train_func == 'train_one_epoch3':
+        return train_one_epoch3
+    elif args.train_func == 'train_one_epoch4':
+        return train_one_epoch4
+    elif args.train_func == 'train_one_epoch5':
+        return train_one_epoch5
+    else:
+        raise ValueError(f"Unknown train function: {args.train_func}")
 
 def main(args):
     utils.init_distributed_mode(args)
@@ -421,7 +438,7 @@ def main(args):
         if args.distributed:
             data_loader_train.sampler.set_epoch(epoch)
 
-        train_stats = train_one_epoch4(
+        train_stats = train_one_epoch(
             model, criterion, data_loader_train,
             optimizer, device, epoch, loss_scaler,
             args.clip_grad, model_ema, mixup_fn,
