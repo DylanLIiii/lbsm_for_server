@@ -209,7 +209,7 @@ def train_one_epoch3(model: torch.nn.Module, criterion: DistillationLoss,
         if args.bce_loss:
             targets = targets.gt(0.0).type(targets.dtype)
          
-        with torch.cuda.amp.autocast(enabled=False):
+        with torch.cuda.amp.autocast():
             # remember to set label smoothing to 0
             outputs = model(samples)
             smoothing = 0.1 + 0.1 * epoch / 299
