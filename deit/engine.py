@@ -139,13 +139,7 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
             smoothing = 0.1 + 0.1 * epoch / 299
             
             zn = torch.gather(outputs, 1, targets.unsqueeze(-1).long())
-            sorted_outputs, sorted_indices = outputs.sort(dim=-1, descending=True)
-            larger_mask = sorted_outputs > zn 
-            sorted_outputs[~larger_mask] = 0 # set all the values less and equal to zn to 0 so just keep larger values 
-            non_zero_mask = sorted_outputs != 0
-            non_zero_sum = torch.sum(sorted_outputs, dim=-1, keepdim=True)
-            non_zero_count = torch.sum(non_zero_mask.float(), dim=-1, keepdim=True)
-            z_larger = non_zero_sum / non_zero_count  # Mean of non-zero values
+            z_larger = calculate_z_mask(outputs, targets, larger=True)
             reg = z_larger - zn 
             one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
             loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
