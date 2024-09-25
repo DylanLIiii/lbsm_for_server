@@ -74,7 +74,7 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
             outputs = model(samples)
             zn = torch.gather(outputs, 1, targets.unsqueeze(-1).long())
             z_top1, _ = outputs.topk(1, dim=-1)
-            reg = z_top1 - zn 
+            reg = zn - z_top1
             smoothing = 0.1 + 0.1 * epoch / 299
             one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
             loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
@@ -140,7 +140,7 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
             
             zn = torch.gather(outputs, 1, targets.unsqueeze(-1).long())
             z_larger = calculate_z_mask(outputs, targets, larger=True)
-            reg = z_larger - zn 
+            reg = zn - z_larger 
             one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
             loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
             
