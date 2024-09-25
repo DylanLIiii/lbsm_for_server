@@ -361,7 +361,7 @@ def train_one_epoch5(model: torch.nn.Module, criterion: DistillationLoss,
             # comment this line to disable mixup, cutmix and label smoothing
             # should change mixup_fn to return lam 
             # or calculate by targets  
-            samples, mixed_targets, lam = mixup_fn(samples, targets)
+            samples, mixed_targets = mixup_fn(samples, targets)
             
         if args.cosub:
             samples = torch.cat((samples,samples),dim=0)
