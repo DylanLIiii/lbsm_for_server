@@ -134,9 +134,9 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
-        # if mixup_fn is not None:
-        #     # comment this line to disable mixup, cutmix and label smoothing
-        #     #samples, targets = mixup_fn(samples, targets)
+        if mixup_fn is not None:
+            # comment this line to disable mixup, cutmix and label smoothing
+            samples, mixed_targets = mixup_fn(samples, targets)
             
         if args.cosub:
             samples = torch.cat((samples,samples),dim=0)
