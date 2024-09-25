@@ -15,6 +15,7 @@ touch "${OUTPUT_DIR}/${EXPERIMENT_NAME1}/outputs.txt"
 # Run the distributed training
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
     --nproc_per_node=$NUM_GPUS \
+    --master_port 29500 \
     --use_env \
     main.py \
     --model $MODEL \
