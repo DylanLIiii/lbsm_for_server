@@ -303,8 +303,10 @@ def train_one_epoch4(model: torch.nn.Module, criterion: DistillationLoss,
             zn2 = torch.gather(outputs, -1, target2)
             reg1 = zn1 - outputs.mean(dim=-1, keepdim=True)
             reg2 = zn2 - outputs.mean(dim=-1, keepdim=True)
-            loss1 = target1_lam.mean() * (criterion(samples, outputs, target1.view(-1,1)) + smoothing * reg1.mean())
-            loss2 = target2_lam.mean() * (criterion(samples, outputs, target2.view(-1,1)) + smoothing * reg2.mean())
+            one_hot_targets1 = torch.nn.functional.one_hot(target1, num_classes=outputs.size(1)).float()
+            one_hot_targets2 = torch.nn.functional.one_hot(target2, num_classes=outputs.size(1)).float()
+            loss1 = target1_lam.mean() * (criterion(samples, outputs, one_hot_targets1) + smoothing * reg1.mean())
+            loss2 = target2_lam.mean() * (criterion(samples, outputs, one_hot_targets2) + smoothing * reg2.mean())
             loss = loss1 + loss2
             
             # second solution 
