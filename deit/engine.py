@@ -213,7 +213,6 @@ def train_one_epoch3(model: torch.nn.Module, criterion: DistillationLoss,
             target1 = two_indices[:, 0]
             target2 = two_indices[:, 1]
             
-            
             # consider in two target 
             zn1 = torch.gather(outputs, -1, target1.view(-1,1).long())
             z_smaller1 = calculate_z_mask(outputs, target1, larger=False)
@@ -229,7 +228,7 @@ def train_one_epoch3(model: torch.nn.Module, criterion: DistillationLoss,
             reg1 = z_top2 - zn1
             reg2 = z_top2 - zn2 
             
-            weighted_reg_smaller = target1_lam * reg_smaller1 + target2_lam * reg_smaller2
+            weighted_reg_smaller = target1_lam.mean() * reg_smaller1 + target2_lam.mean() * reg_smaller2
             non_weighted_reg = 0.5 * reg1 + 0.5 * reg2
             
             loss = criterion(samples, outputs, mixed_targets) + smoothing * (weighted_reg_smaller.mean() + non_weighted_reg.mean())
