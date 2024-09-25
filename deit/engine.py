@@ -59,9 +59,9 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
-        # if mixup_fn is not None:
-        #     # comment this line to disable mixup, cutmix and label smoothing
-        #     #samples, mixed_targets, lam = mixup_fn(samples, targets)
+        if mixup_fn is not None:
+            # comment this line to disable mixup, cutmix and label smoothing
+            samples, mixed_targets = mixup_fn(samples, targets)
             
         if args.cosub:
             samples = torch.cat((samples,samples),dim=0)
@@ -70,15 +70,25 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
             targets = targets.gt(0.0).type(targets.dtype)
          
         with torch.cuda.amp.autocast():
+            # remember to set label smoothing to 0
             outputs = model(samples)
-            zn = torch.gather(outputs, 1, targets.unsqueeze(-1).long())
-            z_top1, _ = outputs.topk(1, dim=-1)
-
-            reg = zn - z_top1
             smoothing = 0.1 + 0.1 * epoch / 299
-            one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
-            loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
-        
+            two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
+            two_logits, _ = outputs.topk(2, dim=-1)
+            target1_lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+            target2_lam = two_targets[:, 1] / (1. - args.smoothing + args.smoothing / 1000)
+            target1 = two_indices[:, 0]
+            target2 = two_indices[:, 1]
+            
+            z_top1_target1 = two_logits[:, 0]
+            z_top1_target2 = two_logits[:, 1]
+            
+            # consider in two target 
+            zn1 = torch.gather(outputs, -1, target1.view(-1,1).long())
+            reg1 = z_top1_target1.reshape(-1,1) - zn1
+            
+            zn2 = torch.gather(outputs, -1, target2.view(-1,1).long())
+            reg2 = z_top1_target2.reshape(-1,1) - zn2
             
 
         loss_value = loss.item()
@@ -135,13 +145,29 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
             targets = targets.gt(0.0).type(targets.dtype)
          
         with torch.cuda.amp.autocast():
+            # remember to set label smoothing to 0
             outputs = model(samples)
             smoothing = 0.1 + 0.1 * epoch / 299
-            zn = torch.gather(outputs, 1, targets.unsqueeze(-1).long())
-            z_larger = calculate_z_mask(outputs, targets, larger=True)
-            reg = zn - z_larger 
-            one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
-            loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
+            two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
+            target1_lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+            target2_lam = two_targets[:, 1] / (1. - args.smoothing + args.smoothing / 1000)
+            target1 = two_indices[:, 0]
+            target2 = two_indices[:, 1]
+            zn1 = torch.gather(outputs, -1, target1.view(-1,1).long())
+            z_smaller1 = calculate_z_mask(outputs, target1, larger=False)
+            zn2 = torch.gather(outputs, -1, target2.view(-1,1).long())
+            z_smaller2 = calculate_z_mask(outputs, target2, larger=False)
+            top1_zc = outputs.topk(1, -1)[0]
+            reg_smaller1 = zn1 - z_smaller1 
+            reg1 = zn1 - top1_zc
+            reg_smaller2 = zn2 - z_smaller2 
+            reg2 = zn2 - top1_zc
+            
+            one_hot_targets1 = torch.nn.functional.one_hot(target1, num_classes=outputs.size(1)).float()
+            one_hot_targets2 = torch.nn.functional.one_hot(target2, num_classes=outputs.size(1)).float()
+            loss1 = criterion(samples, outputs, one_hot_targets1) + smoothing * (reg_smaller1.mean() + reg1.mean())
+            loss2 = criterion(samples, outputs, one_hot_targets2) + smoothing * (reg_smaller2.mean() + reg2.mean())
+            loss = target1_lam.mean() * loss1 + target2_lam.mean() * loss2
             
 
         loss_value = loss.item()
@@ -223,9 +249,10 @@ def train_one_epoch3(model: torch.nn.Module, criterion: DistillationLoss,
             reg_smaller2 = zn2 - z_smaller2
             
             z_top2, _ = outputs.topk(2, dim=-1)
-            z_top2 = z_top2[:,1]
-            reg1 = z_top2 - zn1
-            reg2 = z_top2 - zn2 
+            z_top1_target1 = z_top2[:,0]
+            reg1 = z_top1_target1 - zn1
+            z_top1_target2 = z_top2[:,1]
+            reg2 = z_top1_target2 - zn2 
             
             weighted_reg_smaller = target1_lam.mean() * reg_smaller1 + target2_lam.mean() * reg_smaller2
             non_weighted_reg = 0.5 * reg1 + 0.5 * reg2
