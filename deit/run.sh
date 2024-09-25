@@ -4,7 +4,7 @@
 EXPERIMENT_NAME1=$1
 TRAIN_FUNC=$2
 MODEL="deit_small_patch16_224"
-BATCH_SIZE=12
+BATCH_SIZE=256
 DATA_PATH="/home/couser/imagenet/data"
 OUTPUT_DIR="/home/couser/lbsm_results"
 NUM_GPUS=4
