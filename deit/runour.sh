@@ -14,6 +14,7 @@ touch "${OUTPUT_DIR}/${EXPERIMENT_NAME1}/outputs.txt"
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
     --nproc_per_node=$NUM_GPUS \
     --use_env \
+    --master_port 29501 \
     main.py \
     --model $MODEL \
     --batch-size $BATCH_SIZE \

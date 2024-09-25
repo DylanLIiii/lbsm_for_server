@@ -24,5 +24,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
     --output_dir "${OUTPUT_DIR}/${EXPERIMENT_NAME1}"\
     --smoothing 0.0 \
     --seed 0 \
+    --dist_eval \
     --train-func $TRAIN_FUNC \
     | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME1}/outputs.txt"
