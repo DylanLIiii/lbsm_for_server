@@ -34,9 +34,8 @@ def calculate_z_mask(outputs, targets, larger=True):
         mask = sorted_outputs > zn
     sorted_outputs[~mask] = 0  # Keep only masked values
     
-    non_zero_mask = sorted_outputs != 0
     non_zero_sum = torch.sum(sorted_outputs, dim=-1, keepdim=True)
-    non_zero_count = torch.sum(non_zero_mask.float(), dim=-1, keepdim=True)
+    non_zero_count = torch.count_nonzero(sorted_outputs, dim=-1).unsqueeze(-1)
     
     z_mask = non_zero_sum / (non_zero_count + 1e-8)  # Add small epsilon to avoid division by zero?
     return z_mask
