@@ -76,7 +76,8 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
             z_top1, _ = outputs.topk(1, dim=-1)
             reg = z_top1 - zn 
             smoothing = 0.1 + 0.1 * epoch / 299
-            loss = criterion(samples, outputs, targets.unsqueeze(-1).long()) 
+            one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
+            loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
         
             
 
@@ -146,7 +147,8 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
             non_zero_count = torch.sum(non_zero_mask.float(), dim=-1, keepdim=True)
             z_larger = non_zero_sum / non_zero_count  # Mean of non-zero values
             reg = z_larger - zn 
-            loss = criterion(samples, outputs, targets.unsqueeze(-1).long()) + smoothing * reg.mean()
+            one_hot_targets = torch.nn.functional.one_hot(targets, num_classes=outputs.size(1)).float()
+            loss = criterion(samples, outputs, one_hot_targets) + smoothing * reg.mean()
             
 
         loss_value = loss.item()
@@ -394,8 +396,10 @@ def train_one_epoch5(model: torch.nn.Module, criterion: DistillationLoss,
             reg_smaller2 = zn2 - z_smaller2 
             reg_larger2 = z_larger2 - zn2
             
-            loss1 = criterion(samples, outputs, target1.view(-1,1)) + smoothing * (reg_smaller1.mean() + reg_larger1.mean())
-            loss2 = criterion(samples, outputs, target2.view(-1,1)) + smoothing * (reg_smaller2.mean() + reg_larger2.mean())
+            one_hot_targets1 = torch.nn.functional.one_hot(target1, num_classes=outputs.size(1)).float()
+            one_hot_targets2 = torch.nn.functional.one_hot(target2, num_classes=outputs.size(1)).float()
+            loss1 = criterion(samples, outputs, one_hot_targets1) + smoothing * (reg_smaller1.mean() + reg_larger1.mean())
+            loss2 = criterion(samples, outputs, one_hot_targets2) + smoothing * (reg_smaller2.mean() + reg_larger2.mean())
             loss = target1_lam * loss1 + target2_lam * loss2
             
         loss_value = loss.item()
