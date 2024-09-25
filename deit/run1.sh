@@ -17,7 +17,7 @@ touch "${OUTPUT_DIR}/${EXPERIMENT_NAME1}/outputs.txt"
 RESUME_ARG=""
 if [ -n "$IS_RESUME" ]; then
     echo "Resume training from ${OUTPUT_DIR}/${EXPERIMENT_NAME1}/checkpoint.pth"
-    RESUME_ARG="--resume '${OUTPUT_DIR}/${EXPERIMENT_NAME1}/checkpoint.pth'"
+    RESUME_ARG="--resume ${OUTPUT_DIR}/${EXPERIMENT_NAME1}/checkpoint.pth"
 fi
 
 # Run the distributed training
