@@ -8,7 +8,7 @@ TRAIN_FUNC=$2
 mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
 
-CUDA_VISIBLE_DEVICES=0 python /usr0/home/zhiqic/hengl/Resnet/train.py \
+CUDA_VISIBLE_DEVICES=0 python train.py \
   --model resnet50 \
   --cache-dataset \
   --amp \
@@ -31,6 +31,6 @@ CUDA_VISIBLE_DEVICES=0 python /usr0/home/zhiqic/hengl/Resnet/train.py \
   --print-freq 10 \
   --output-dir "${OUTPUT_DIR}/${EXPERIMENT_NAME}" \
   --seed 0 \
-  --label-smoothing 0.1 \
+  --label-smoothing 0.0 \
   --train-func $TRAIN_FUNC \
   | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"

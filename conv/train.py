@@ -83,7 +83,7 @@ def train_one_epoch2(model, criterion, optimizer, data_loader, device, epoch, ar
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            no_ls_criterion = nn.CrossEntropyLoss(label_smoothing=0.0)
+            no_ls_criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
             loss = no_ls_criterion(output, target)
 
         optimizer.zero_grad()
