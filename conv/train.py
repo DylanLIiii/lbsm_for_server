@@ -14,6 +14,7 @@ from torch import nn
 from torch.utils.data.dataloader import default_collate
 from torchvision.transforms.functional import InterpolationMode
 from transforms import get_mixup_cutmix
+import numpy as np
 
 def select_train_func(args):
     if args.train_func == "train_one_epoch1":
@@ -355,6 +356,9 @@ def load_data(traindir, valdir, args):
 
 
 def main(args):
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    # random.seed(seed)
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
@@ -676,6 +680,7 @@ def get_args_parser(add_help=True):
     parser.add_argument("--backend", default="PIL", type=str.lower, help="PIL or tensor - case insensitive")
     parser.add_argument("--use-v2", action="store_true", help="Use V2 transforms")
     parser.add_argument("--train-func", default=None, type=str, help="train function")
+    parser.add_argument("--seed", default=0, type=int, help="random seed")
     return parser
 
 
