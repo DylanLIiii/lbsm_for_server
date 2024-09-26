@@ -201,9 +201,6 @@ def train_one_epoch3(model: torch.nn.Module, criterion: DistillationLoss,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
-    if TIME % 50 == 0:
-        print("Experiment 3: No Mixup and Cutmix + ls + z_1 - zn ")
-    TIME += 1
     if args.cosub:
         criterion = torch.nn.BCEWithLogitsLoss()
         
