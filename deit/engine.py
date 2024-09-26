@@ -43,8 +43,6 @@ def calculate_z_mask(outputs, targets, larger=True):
 
 
 
-global TIME 
-TIME = 0
 def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
@@ -55,9 +53,7 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
-    if TIME % 50 == 0:
-        print("Experiment 1: z1 - zn nomixup no label smoothing")
-    TIME += 1
+
     
     if args.cosub:
         criterion = torch.nn.BCEWithLogitsLoss()
