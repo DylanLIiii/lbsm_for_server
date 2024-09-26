@@ -8,7 +8,7 @@ TRAIN_FUNC=$2
 mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
 
-CUDA_VISIBLE_DEVICES=0 python /usr0/home/zhiqic/hengl/Resnet/train.py \
+CUDA_VISIBLE_DEVICES=1 python /usr0/home/zhiqic/hengl/Resnet/train.py \
   --model resnet50 \
   --cache-dataset \
   --amp \
