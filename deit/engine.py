@@ -118,9 +118,6 @@ def train_one_epoch2(model: torch.nn.Module, criterion: DistillationLoss,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
-    if TIME % 50 == 0:
-        print("Experiment 2: Best set + label smoothing ")
-    TIME += 1
     if args.cosub:
         criterion = torch.nn.BCEWithLogitsLoss()
         
