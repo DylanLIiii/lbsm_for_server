@@ -519,7 +519,7 @@ def main(args):
 
     print("Start training")
     # select the train function
-    train_func = select_train_func(args)
+    train_one_epoch= select_train_func(args)
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
