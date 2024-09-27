@@ -10,7 +10,6 @@ touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
 
 CUDA_VISIBLE_DEVICES=2 python train.py \
   --model resnet50 \
-  --cache-dataset \
   --amp \
   --data-path "${DATA_PATH}" \
   --workers 12 \
