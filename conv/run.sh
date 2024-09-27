@@ -14,7 +14,7 @@ CUDA_VISIBLE_DEVICES=0 python train.py \
   --amp \
   --data-path "${DATA_PATH}" \
   --workers 12 \
-  --batch-size 2048 \
+  --batch-size 1024 \
   --epochs 90 \
   --opt sgd \
   --momentum 0.9 \
