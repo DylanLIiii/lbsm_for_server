@@ -12,7 +12,7 @@ CUDA_VISIBLE_DEVICES=0 python train.py \
   --model resnet50 \
   --amp \
   --data-path "${DATA_PATH}" \
-  --workers 12 \
+  --workers 6 \
   --batch-size 1024 \
   --epochs 90 \
   --opt sgd \
