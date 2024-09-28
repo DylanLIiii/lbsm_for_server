@@ -12,7 +12,7 @@ torchrun --standalone --nnodes=1 --nproc_per_node=4
   --model resnet50 \
   --amp \
   --data-path "${DATA_PATH}" \
-  --workers 16 \
+  --workers 12 \
   --batch-size 256 \
   --epochs 90 \
   --opt sgd \
