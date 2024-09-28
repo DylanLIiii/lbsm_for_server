@@ -76,9 +76,6 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
             # remember to set label smoothing to 0
             outputs = model(samples)
             smoothing = 0.1 + 0.1 * epoch / 299
-            two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
-            target1_lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
-            target2_lam = two_targets[:, 1] / (1. - args.smoothing + args.smoothing / 1000)
             z_mean = outputs.mean(dim=-1, keepdim=True)
             top1_zc = outputs.topk(1, -1)[0]
             reg = top1_zc - z_mean
