@@ -15,6 +15,7 @@ import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import json
 import os
+from models.convnext import convnext_tiny
 
 from pathlib import Path
 
@@ -283,6 +284,10 @@ def main(args):
         layer_scale_init_value=args.layer_scale_init_value,
         head_init_scale=args.head_init_scale,
         )
+    
+    model = convnext_tiny(False, False, num_classes=args.nb_classes, drop_path_rate=args.drop_path, 
+                          layer_scale_init_value=args.layer_scale_init_value,
+                          head_init_scale=args.head_init_scale)
 
     if args.finetune:
         if args.finetune.startswith('https'):
