@@ -4,6 +4,7 @@ DATA_PATH="/home/couser/imagenet/data"
 OUTPUT_DIR="/home/couser/lbsm_results"
 NUM_GPUS=4
 TRAIN_FUNC=$2
+RESUME=$3
 
 mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
@@ -32,4 +33,5 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --seed 0 \
   --label-smoothing 0.0 \
   --train-func $TRAIN_FUNC \
+  --resume $RESUME \
   | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
