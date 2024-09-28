@@ -192,7 +192,13 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
 
         with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
             outputs = model(samples)
-        loss = criterion(outputs, targets)
+        
+        smoothing = 0.1 + 0.1 * epoch / 299
+        z_mean = outputs.mean(dim=-1, keepdim=True)
+        top1_zc = outputs.topk(1, -1)[0]
+        reg = top1_zc - z_mean
+        loss = criterion(outputs, targets) + smoothing * reg.mean()
+        
         loss = loss / config.TRAIN.ACCUMULATION_STEPS
 
         # this attribute is added by timm on one optimizer (adahessian)
