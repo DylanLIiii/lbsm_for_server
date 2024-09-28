@@ -132,7 +132,7 @@ def train_one_epoch3(model, criterion, optimizer, data_loader, device, epoch, ar
             loss_criterion = nn.CrossEntropyLoss(label_smoothing=0.0)
             zn = torch.gather(output, -1, target.view(-1, 1))
             z_top1 = output.topk(1, -1)[0]
-            reg = z_top1 - zn
+            reg = z_top1 - output.mean(-1, keepdim=True)
             loss = loss_criterion(output, target) + lam * reg.mean()
 
         optimizer.zero_grad()
