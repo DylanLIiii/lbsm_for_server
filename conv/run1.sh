@@ -1,5 +1,5 @@
 # Set variables
-EXPERIMENT_NAME1=$1
+EXPERIMENT_NAME=$1
 DATA_PATH="/home/couser/imagenet/data"
 OUTPUT_DIR="/home/couser/lbsm_results"
 NUM_GPUS=4
