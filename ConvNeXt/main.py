@@ -275,15 +275,6 @@ def main(args):
             mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
             prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
-
-    model = create_model(
-        args.model, 
-        pretrained=False, 
-        num_classes=args.nb_classes, 
-        drop_path_rate=args.drop_path,
-        layer_scale_init_value=args.layer_scale_init_value,
-        head_init_scale=args.head_init_scale,
-        )
     
     model = convnext_tiny(False, False, num_classes=args.nb_classes, drop_path_rate=args.drop_path, 
                           layer_scale_init_value=args.layer_scale_init_value,
