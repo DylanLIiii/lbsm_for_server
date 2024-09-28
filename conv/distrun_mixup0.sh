@@ -36,7 +36,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --train-crop-size 224 \
   --print-freq 10 \
   --output-dir "${OUTPUT_DIR}/${EXPERIMENT_NAME}" \
-  --seed 0 \
+  --seed 1 \
   --label-smoothing 0.0 \
   --train-func $TRAIN_FUNC \
   --mixup-alpha 0.2 \
