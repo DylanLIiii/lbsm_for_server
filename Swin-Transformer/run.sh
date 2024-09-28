@@ -11,4 +11,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --nproc_per_node
     --batch-size 256 \
     --tag "${EXPERIMENT_NAME}" \
     --output "${OUTPUT_DIR}" \
+    --fused_window_process \
+    --smoothing 0.0 \
     | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
