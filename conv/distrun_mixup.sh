@@ -41,5 +41,5 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --train-func $TRAIN_FUNC \
   --mixup-alpha 0.2 \
   --cutmix-alpha 1.0 \
-  --resume $RESUME \
+  --resume "${RESUME}" \
   | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
