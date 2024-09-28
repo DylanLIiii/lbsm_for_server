@@ -39,4 +39,4 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --label-smoothing 0.0 \
   --train-func $TRAIN_FUNC \
   --resume $RESUME \
-  | tee "{OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
+  | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
