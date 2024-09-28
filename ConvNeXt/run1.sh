@@ -8,9 +8,10 @@ mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --nproc_per_node=4 main.py \
---model convnext_tiny --drop_path 0.1 \
---batch_size 128 --lr 4e-3 --update_freq 4 \
---model_ema true --model_ema_eval true \
---data_path "${DATA_PATH}" \
---output_dir "${OUTPUT_DIR}/${EXPERIMENT_NAME}" \
+--model convnext_tiny --drop-path 0.1 \
+--batch-size 128 --lr 4e-3 --update-freq 4 \
+--model-ema true --model-ema-eval true \
+--data-path "${DATA_PATH}" \
+--output-dir "${OUTPUT_DIR}/${EXPERIMENT_NAME}" \
+--use-amp \
 | tee "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
