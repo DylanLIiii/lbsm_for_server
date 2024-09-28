@@ -13,7 +13,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --standalone --nnodes=1 --nproc_per_node=4
   --amp \
   --data-path "${DATA_PATH}" \
   --workers 12 \
-  --batch-size 1024 \
+  --batch-size 256 \
   --epochs 90 \
   --opt sgd \
   --momentum 0.9 \
