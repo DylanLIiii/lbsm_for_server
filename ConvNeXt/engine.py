@@ -55,7 +55,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                 z_mean = outputs.mean(dim=-1, keepdim=True)
                 top1_zc = outputs.topk(1, -1)[0]
                 reg = top1_zc - z_mean
-                loss = criterion(samples, outputs, mixed_targets) + smoothing * reg.mean()
+                loss = criterion(outputs, mixed_targets) + smoothing * reg.mean()
         else: # full precision
             output = model(samples)
             loss = criterion(output, targets)
