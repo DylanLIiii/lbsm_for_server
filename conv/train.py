@@ -196,12 +196,8 @@ def train_one_epoch4(model, criterion, optimizer, data_loader, device, epoch, ar
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            lam = 0.1 + 0.1 * epoch / (args.epochs - 1)
             loss_criterion = nn.CrossEntropyLoss(label_smoothing=0.0)
-            zn = torch.gather(output, -1, target.view(-1, 1))
-            reg_ls = zn - output.mean(-1, keepdim=True)
-            loss = loss_criterion(output, target) + lam * reg_ls.mean()
-
+            loss = loss_criterion(output, target)
         optimizer.zero_grad()
         if scaler is not None:
             scaler.scale(loss).backward()
