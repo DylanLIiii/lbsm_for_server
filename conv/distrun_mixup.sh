@@ -9,8 +9,8 @@ RESUME=$3
 mkdir -p "${OUTPUT_DIR}/${EXPERIMENT_NAME}"
 touch "${OUTPUT_DIR}/${EXPERIMENT_NAME}/outputs.txt"
 
-if [ "$RESUME" = "resume" ]; then
-  RESUME="${OUTPUT_DIR}/${EXPERIMENT_NAME}/checkpoint.pth"
+if [ -n "$RESUME" ]; then
+  RESUME="${OUTPUT_DIR}/${EXPERIMENT_NAME}/${RESUME}"
 else
   RESUME=""
 fi
