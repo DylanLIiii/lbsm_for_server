@@ -53,18 +53,16 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
-
-    
     if args.cosub:
         criterion = torch.nn.BCEWithLogitsLoss()
         
-    for samples, targets in metric_logger.log_every(data_loader, print_freq, header):
+    for samples, targets, _ in metric_logger.log_every(data_loader, print_freq, header):
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
         if mixup_fn is not None:
             # comment this line to disable mixup, cutmix and label smoothing
-            samples, mixed_targets = mixup_fn(samples, targets)
+            samples, mixed_targets, _ = mixup_fn(samples, targets)
             
         if args.cosub:
             samples = torch.cat((samples,samples),dim=0)
@@ -75,12 +73,24 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
         with torch.cuda.amp.autocast():
             # remember to set label smoothing to 0
             outputs = model(samples)
-            smoothing = 0.1 + 0.1 * epoch / 299
-            z_mean = outputs.mean(dim=-1, keepdim=True)
-            top1_zc = outputs.topk(1, -1)[0]
-            reg = top1_zc - z_mean
-            loss = criterion(samples, outputs, mixed_targets) + smoothing * reg.mean()
-
+            
+        smoothing = 0.1 + 0.1 * epoch / 299
+        two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
+        lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+        target1 = two_indices[:, 0]
+        target2 = two_indices[:, 1]
+        z_mean = outputs.mean(dim=-1, keepdim=True)
+        top2_zc = outputs.topk(2, -1)[0]
+        top1_zc1 = top2_zc[:,0]
+        zn1 = outputs.gather(-1, target1.view(-1,1))
+        zn2 = outputs.gather(-1, target2.view(-1,1))
+        
+        reg_maxsup = top1_zc1 - z_mean
+        ce_loss = criterion(samples, outputs, mixed_targets)
+        Max_Sup_loss = smoothing * reg_maxsup
+        support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
+        loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
+        
         loss_value = loss.item()
 
         if not math.isfinite(loss_value):

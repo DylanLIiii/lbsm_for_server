@@ -41,19 +41,24 @@ def train_one_epoch1(model, criterion, optimizer, data_loader, device, epoch, ar
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            no_ls_criterion = nn.CrossEntropyLoss(label_smoothing=0.0)
-            smoothing = 0.1 + 0.1 * epoch / 299
-            two_targets, two_indices = target.topk(2, dim=-1) 
-            target1_lam = two_targets[:, 0] 
-            target2_lam = two_targets[:, 1] 
-            z_mean = output.mean(dim=-1, keepdim=True)
-            top2_zc = output.topk(2, -1)[0]
-            top1_zc1 = top2_zc[:,0]
-            top1_zc2 = top2_zc[:,1]
-            reg1 = top1_zc1 - z_mean
-            reg2 = top1_zc2 - z_mean 
-            reg = target1_lam.mean() * reg1 + target2_lam.mean() * reg2
-            loss = no_ls_criterion(output, target) + smoothing * reg.mean()
+        smoothing = 0.1 + 0.1 * epoch / 299
+        two_targets, two_indices = target.topk(2, dim=-1) 
+        lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+        target1 = two_indices[:, 0]
+        target2 = two_indices[:, 1]
+        z_mean = output.mean(dim=-1, keepdim=True)
+        top2_zc = output.topk(2, -1)[0]
+        top1_zc1 = top2_zc[:,0]
+        zn1 = output.gather(-1, target1.view(-1,1))
+        zn2 = output.gather(-1, target2.view(-1,1))
+        
+        reg_maxsup = top1_zc1 - z_mean
+        ce_loss = criterion(output, target)
+        Max_Sup_loss = smoothing * reg_maxsup
+        support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
+        loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
+        
+        loss = loss / config.TRAIN.ACCUMULATION_STEPS
 
         optimizer.zero_grad()
         if scaler is not None:
@@ -149,7 +154,7 @@ def train_one_epoch3(model, criterion, optimizer, data_loader, device, epoch, ar
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
-            lam = 0.1 + 0.1 * epoch / (args.epochs - 1)
+            lam = 0.1 
             loss_criterion = nn.CrossEntropyLoss(label_smoothing=0.0)
             z_top1 = output.topk(1, -1)[0]
             reg = z_top1 - output.mean(-1, keepdim=True)

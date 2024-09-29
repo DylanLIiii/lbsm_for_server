@@ -194,10 +194,23 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
             outputs = model(samples)
         
         smoothing = 0.1 + 0.1 * epoch / 299
+        two_targets, two_indices = targets.topk(2, dim=-1) 
+        lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+        target1 = two_indices[:, 0]
+        target2 = two_indices[:, 1]
         z_mean = outputs.mean(dim=-1, keepdim=True)
-        top1_zc = outputs.topk(1, -1)[0]
-        reg = top1_zc - z_mean
-        loss = criterion(outputs, targets) + smoothing * reg.mean()
+        top2_zc = outputs.topk(2, -1)[0]
+        top1_zc1 = top2_zc[:,0]
+        zn1 = outputs.gather(-1, target1.view(-1,1))
+        zn2 = outputs.gather(-1, target2.view(-1,1))
+        
+        reg_maxsup = top1_zc1 - z_mean
+        ce_loss = criterion(outputs, targets)
+        Max_Sup_loss = smoothing * reg_maxsup
+        support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
+        loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
+        
+        loss = loss / config.TRAIN.ACCUMULATION_STEPS
         
         loss = loss / config.TRAIN.ACCUMULATION_STEPS
 
