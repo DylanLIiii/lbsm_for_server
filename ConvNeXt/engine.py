@@ -52,7 +52,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             with torch.cuda.amp.autocast():
                 outputs = model(samples)
             smoothing = 0.1 + 0.1 * epoch / 299
-            two_targets, two_indices = targets.topk(2, dim=-1) 
+            two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
             lam = two_targets[:, 0] 
             target1 = two_indices[:, 0]
             target2 = two_indices[:, 1]
@@ -63,7 +63,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             zn2 = outputs.gather(-1, target2.view(-1,1))
             
             reg_maxsup = top1_zc1 - z_mean
-            ce_loss = criterion(outputs, targets)
+            ce_loss = criterion(outputs, mixed_targets)
             Max_Sup_loss = smoothing * reg_maxsup
             support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
             loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
