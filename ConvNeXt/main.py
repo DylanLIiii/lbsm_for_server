@@ -177,7 +177,7 @@ def get_args_parser():
                         help='Enabling distributed evaluation')
     parser.add_argument('--disable-eval', type=str2bool, default=False,
                         help='Disabling evaluation during training')
-    parser.add_argument('--num-workers', default=10, type=int)
+    parser.add_argument('--num-workers', default=16, type=int)
     parser.add_argument('--pin_mem', type=str2bool, default=True,
                         help='Pin CPU memory in DataLoader for more efficient (sometimes) transfer to GPU.')
 
