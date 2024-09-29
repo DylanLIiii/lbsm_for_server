@@ -43,7 +43,7 @@ def train_one_epoch1(model, criterion, optimizer, data_loader, device, epoch, ar
             output = model(image)
         smoothing = 0.1 + 0.1 * epoch / 299
         two_targets, two_indices = target.topk(2, dim=-1) 
-        lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+        lam = two_targets[:, 0]
         target1 = two_indices[:, 0]
         target2 = two_indices[:, 1]
         z_mean = output.mean(dim=-1, keepdim=True)
