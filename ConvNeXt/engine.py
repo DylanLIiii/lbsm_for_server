@@ -25,7 +25,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
-    print_freq = 10
+    print_freq = 100
 
     optimizer.zero_grad()
 
@@ -51,11 +51,22 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         if use_amp:
             with torch.cuda.amp.autocast():
                 outputs = model(samples)
-                smoothing = 0.1 + 0.1 * epoch / 299
-                z_mean = outputs.mean(dim=-1, keepdim=True)
-                top1_zc = outputs.topk(1, -1)[0]
-                reg = top1_zc - z_mean
-                loss = criterion(outputs, mixed_targets) + smoothing * reg.mean()
+            smoothing = 0.1 + 0.1 * epoch / 299
+            two_targets, two_indices = targets.topk(2, dim=-1) 
+            lam = two_targets[:, 0] 
+            target1 = two_indices[:, 0]
+            target2 = two_indices[:, 1]
+            z_mean = outputs.mean(dim=-1, keepdim=True)
+            top2_zc = outputs.topk(2, -1)[0]
+            top1_zc1 = top2_zc[:,0]
+            zn1 = outputs.gather(-1, target1.view(-1,1))
+            zn2 = outputs.gather(-1, target2.view(-1,1))
+            
+            reg_maxsup = top1_zc1 - z_mean
+            ce_loss = criterion(outputs, targets)
+            Max_Sup_loss = smoothing * reg_maxsup
+            support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
+            loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
         else: # full precision
             output = model(samples)
             loss = criterion(output, targets)

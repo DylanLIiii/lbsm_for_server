@@ -211,8 +211,6 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
         
         loss = loss / config.TRAIN.ACCUMULATION_STEPS
-        
-        loss = loss / config.TRAIN.ACCUMULATION_STEPS
 
         # this attribute is added by timm on one optimizer (adahessian)
         is_second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
