@@ -89,7 +89,7 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
         ce_loss = criterion(samples, outputs, mixed_targets)
         Max_Sup_loss = smoothing * reg_maxsup
         support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
-        loss = ce_loss + Max_Sup_loss.mean() + support_mixup_loss.mean()
+        loss = ce_loss + 0.5 * (Max_Sup_loss.mean() + support_mixup_loss.mean())
         
         loss_value = loss.item()
 
