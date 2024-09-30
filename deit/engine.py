@@ -56,13 +56,13 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
     if args.cosub:
         criterion = torch.nn.BCEWithLogitsLoss()
         
-    for samples, targets, _ in metric_logger.log_every(data_loader, print_freq, header):
+    for samples, targets in metric_logger.log_every(data_loader, print_freq, header):
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
         if mixup_fn is not None:
             # comment this line to disable mixup, cutmix and label smoothing
-            samples, mixed_targets, _ = mixup_fn(samples, targets)
+            samples, mixed_targets = mixup_fn(samples, targets)
             
         if args.cosub:
             samples = torch.cat((samples,samples),dim=0)
