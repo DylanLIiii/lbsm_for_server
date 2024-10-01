@@ -74,22 +74,32 @@ def train_one_epoch1(model: torch.nn.Module, criterion: DistillationLoss,
             # remember to set label smoothing to 0
             outputs = model(samples)
             
-        smoothing = 0.1 + 0.1 * epoch / 299
-        two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
-        lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
-        target1 = two_indices[:, 0]
-        target2 = two_indices[:, 1]
-        z_mean = outputs.mean(dim=-1, keepdim=True)
-        top2_zc = outputs.topk(2, -1)[0]
-        top1_zc1 = top2_zc[:,0]
-        zn1 = outputs.gather(-1, target1.view(-1,1))
-        zn2 = outputs.gather(-1, target2.view(-1,1))
+        # smoothing = 0.1 + 0.1 * epoch / 299
+        # two_targets, two_indices = mixed_targets.topk(2, dim=-1) 
+        # lam = two_targets[:, 0] / (1. - args.smoothing + args.smoothing / 1000)
+        # target1 = two_indices[:, 0]
+        # target2 = two_indices[:, 1]
+        # z_mean = outputs.mean(dim=-1, keepdim=True)
+        # top2_zc = outputs.topk(2, -1)[0]
+        # top1_zc1 = top2_zc[:,0]
+        # zn1 = outputs.gather(-1, target1.view(-1,1))
+        # zn2 = outputs.gather(-1, target2.view(-1,1))
         
-        reg_maxsup = top1_zc1 - z_mean
-        ce_loss = criterion(samples, outputs, mixed_targets)
-        Max_Sup_loss = smoothing * reg_maxsup
-        support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
-        loss = ce_loss + 0.5 * (Max_Sup_loss.mean() + support_mixup_loss.mean())
+        # reg_maxsup = top1_zc1 - z_mean
+        # ce_loss = criterion(samples, outputs, mixed_targets)
+        # Max_Sup_loss = smoothing * reg_maxsup
+        # support_mixup_loss = smoothing * (lam - 0.5) * (zn1 - zn2)
+        # loss = ce_loss + 0.5 * (Max_Sup_loss.mean() + support_mixup_loss.mean())
+        
+
+        # modification top 1 loss
+        top2_targets, top2_inds = mixed_targets.topk(2, -1)
+        top2_zn = torch.gather(outputs, -1, top2_inds)
+        top2_zc = outputs.topk(2, -1)[0]
+        reg = (top2_zc - top2_zn).mean(-1, keepdim=True) + top2_zc[:, :1] - outputs.mean(-1, keepdim=True)
+        
+        lam = 0.1 + epoch*0.1/299
+        loss = criterion(samples, outputs, mixed_targets) + lam*reg.mean()/2
         
         loss_value = loss.item()
 
