@@ -55,7 +55,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
             zc_top1 = outputs.topk(1, dim=-1)[0]
             z_mean = outputs.mean(-1, keep_dim=True)
             aux_loss = (zc_top1 - z_meam) * smoothing
-            loss = criterion(output, targets) + aux_loss.mean()
+            nll_loss = criterion(output, targets)
+            loss = nll_loss + aux_loss.mean()
         else: # full precision
             output = model(samples)
             loss = criterion(output, targets)
@@ -93,6 +94,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         else:
             class_acc = None
         metric_logger.update(loss=loss_value)
+        metric_logger.update(nll_loss=nll_loss.item())
+        metric_logger.update(aux_loss=aux_loss.mean().item())
         metric_logger.update(class_acc=class_acc)
         min_lr = 10.
         max_lr = 0.
